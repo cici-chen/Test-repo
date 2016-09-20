@@ -1,4 +1,4 @@
-setwd("d:/abock/CDI_Mapping/SB_Mapping/PRMSdata")
+setwd("d:/abock/CDI_Mapping/bitbucket/sb_mapping")
 source("func.R")
 
 #**********************************************************************************************************
@@ -28,7 +28,7 @@ child_item<-sbtools::item_get(sFlow_SBid)
 # change line segment width by value
 layer<-sbtools::item_get_wfs("571559c2e4b0ef3b7ca864c7")
 # need to order the basin names and segs like they are in line 41 sbmaps_segments
-segMap<-read.csv("d:/abock/CDI_Mapping/SB_Mapping/PRMSdata/Streamsegments_Qchange_Buffer.csv",header=T,row.names=1)
+segMap<-read.csv("d:/abock/CDI_Mapping/bitbucket/sb_mapping/Streamsegments_Qchange_Buffer.csv",header=T,row.names=1)
 segMap<-segMap[-c(186,187),]
 # order by POI_ID
 segMap<-segMap[with(segMap,order(POI_ID)),]
@@ -115,11 +115,15 @@ Seas2080<-seasonalMeans(futData2080,baseSeas)
 depS2080<-avGCM_Seas(Seas2080,gcms[1:2],2080)
 depSeason<<-cbind(depS2030,depS2055,depS2080)
 
-
 ## Mean monthly aggregation
 baseData$date<-rownames(baseData)
 baseData_zoo<-zoo::read.zoo(baseData,index.column=186)
-baseData_MM<-t(aggregate(baseData_zoo,function(x) cycle(zoo::as.yearmon(x)),na.rm=T))
+#baseData_MM<-t(aggregate(baseData_zoo,function(x) cycle(zoo::as.yearmon(x)),na.rm=T))
+TS<-xts::as.xts(baseData)
+mos<-list(9,10,11,0,1,2,3,4,5,6,7,8)
+baseData_MM1<-lapply(mos,function(x) colMeans(baseData_zoo[xts::.indexmon(TS) %in% c(x),]))
+baseData_MM<-t(do.call(rbind,baseData_MM1))
+
 MM2030<-t(MeanMonthly(futData2030,baseData_MM))
 depMM2030<-avGCM_MM(MM2030,gcms[1:2],2030)
 MM2055<-t(MeanMonthly(futData2055,baseData_MM))
