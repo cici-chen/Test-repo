@@ -94,15 +94,14 @@ avGCM_Seas<-function(DF,gcms,yr){
 }
 
 MeanMonthly<-function(DF,DFCC){
-  DF$date<-rownames(DF)
-  DF_zoo<-zoo::read.zoo(DF,index.column=dim(DF)[2])
-  DF_MM<-t(aggregate(DF_zoo,function(x) cycle(zoo::as.yearmon(x)),na.rm=T))
+  TS2<-xts::as.xts(DF)
+  mos<-list(9,10,11,0,1,2,3,4,5,6,7,8)
+  DF_MM1<-lapply(mos,function(x) colMeans(DF[xts::.indexmon(TS2) %in% c(x),]))
+  DF_MM<-t(do.call(rbind,DF_MM1))
+  print(head(DF_MM))
   Base_MM<-do.call(rbind,replicate((dim(DF_MM)[1]/dim(DFCC)[1]),DFCC,simplify=F))
-  print(dim(Base_MM))
-  print(dim(DF_MM))
+  print(head(Base_MM))
   Dep_MM<-((DF_MM-Base_MM)/Base_MM)*100
-  Dep_MM<-Dep_MM[,order(as.numeric(colnames(Dep_MM)))]
-  print(colnames(Dep_MM))
   return(Dep_MM)
 }
 
