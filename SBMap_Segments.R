@@ -1,4 +1,5 @@
 setwd("d:/abock/CDI_Mapping/bitbucket/sb_mapping")
+# Bring in script with ancillary functions
 source("func.R")
 
 #**********************************************************************************************************
@@ -11,6 +12,7 @@ source("func.R")
 # This is the child SB id for Kathy's Streamflow data - 55b69c6ae4b09a3b01b5f653
 PRMS_item<-sbtools::item_get("5522bdf7e4b027f0aee3d039")
 names(PRMS_item)
+#********************************************************************************************************
 # The PRMS streamflow data is a child ("Appendix 2") of Kathy's data
 children<-sbtools::item_list_children(PRMS_item)
 # We need the ScienceBase Id of Kathy's streamflow da"ta, 
@@ -37,15 +39,16 @@ segMap<-segMap[with(segMap,order(POI_ID)),]
 GF_layer<-layer[which(layer@data$POI_ID %in% segMap$POI_ID),]
 
 #GFsegs_buffer<-rgeos::gBuffer(GF_segs,byid=FALSE,width=100,capStyle="ROUND",joinStyle="ROUND")
+# This is the reprojection to WGS84 web mercator - 3857, plain WGS84-4326
+#GF_layer_GEO<-sp::spTransform(GF_layer,"+init=epsg:4326")
 finalSegs<-sp::spTransform(GF_layer,"+init=epsg:4326")
-# This is the reprojection to WGS84 web mercator
-#finalSegs<-sp::spTransform(GF_layer,"+init=epsg:3857")
 finalSegs<-finalSegs[order(finalSegs$POI_ID),]
 # Add the basin name, code, and segment number
 # so that they can be used in Shiny
 finalSegs@data$Basin<-segMap$Basin
 finalSegs@data$Code<-segMap$Code
 finalSegs@data$Nseg<-segMap$Nseg
+finalSegs@data$Segment<-segMap$Segment
 finalSegs<-finalSegs[order(finalSegs$Nseg),]
 
 # gets the xy points of each line
@@ -54,6 +57,11 @@ res <- lapply(slot(finalSegs, "lines"), function(x) lapply(slot(x, "Lines"),
 test<-lapply(res, function(x) c(max(unlist(x)),min(unlist(x))))
 Lats<-unlist(test)[c(TRUE,FALSE)]
 Longs<-unlist(test)[c(FALSE,TRUE)]
+
+# gets the basins data
+basins<-sbtools::item_get_wfs("57eeb55fe4b00abc11480e2c")
+finalBasins<-sp::spTransform(basins,"+init=epsg:4326")
+
 #********************************************************************************************************
 #********************************************************************************************************
 # List the streamflow files from Appendix2
@@ -107,13 +115,10 @@ rownames(depAll)<-colnames(baseData)
 #********************************************************************************************************
 # Seasonal aggregation
 baseSeas<-t(seasonalMeans_Base(baseData))
-Seas2030<-seasonalMeans(futData2030,baseSeas)
-depS2030<-avGCM_Seas(Seas2030,gcms[1:2],2030)
-Seas2055<-seasonalMeans(futData2055,baseSeas)
-depS2055<-avGCM_Seas(Seas2055,gcms,2055)
-Seas2080<-seasonalMeans(futData2080,baseSeas)
-depS2080<-avGCM_Seas(Seas2080,gcms[1:2],2080)
-depSeason<<-cbind(depS2030,depS2055,depS2080)
+depS2030<-seasonalMeans(futData2030,baseSeas,gcms[1:2],2030)
+depS2055<-seasonalMeans(futData2055,baseSeas,gcms,2055)
+depS2080<-seasonalMeans(futData2080,baseSeas,gcms[1:2],2080)
+depSeason<-cbind(depS2030,depS2055,depS2080)
 
 ## Mean monthly aggregation
 baseData$date<-rownames(baseData)
@@ -124,12 +129,11 @@ mos<-list(9,10,11,0,1,2,3,4,5,6,7,8)
 baseData_MM1<-lapply(mos,function(x) colMeans(baseData_zoo[xts::.indexmon(TS) %in% c(x),]))
 baseData_MM<-t(do.call(rbind,baseData_MM1))
 
-MM2030<-t(MeanMonthly(futData2030,baseData_MM))
-depMM2030<-avGCM_MM(MM2030,gcms[1:2],2030)
-MM2055<-t(MeanMonthly(futData2055,baseData_MM))
-depMM2055<-avGCM_MM(MM2055,gcms,2055)
-MM2080<-t(MeanMonthly(futData2080,baseData_MM))
-depMM2080<-avGCM_MM(MM2080,gcms[1:2],2080)
+#MM2030<-t(MeanMonthly(futData2030,baseData_MM))
+#depMM2030<-avGCM_MM(MM2030,gcms[1:2],2030)
+depMM2030<-MeanMonthly(futData2030,baseData_MM,gcms[1:2],2030)
+depMM2055<-MeanMonthly(futData2055,baseData_MM,gcms,2055)
+depMM2080<-MeanMonthly(futData2080,baseData_MM,gcms[1:2],2080)
 
 depMM<<-cbind(depMM2030,depMM2055,depMM2080)
 

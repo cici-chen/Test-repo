@@ -18,8 +18,6 @@ SF_vars<<-c("Qann", "QSpring","QSummer","QFall","QWinter","QJanuary",
 ui <- fluidPage(
   useShinyjs(),
   tags$style(type = "text/css", "html, body {width:100%;height:100%;font-family:\"Arial Narrow\",Arial,Sans-serif}"),
-#             ".shiny-output-error { visibility: hidden; }",
-#             ".shiny-output-error:before { visibility: hidden; }"),
   h1("Potential Changes in Streamflow - Eastern and Central Montana"),
   h3("18-year changes from baseline (Water Years 1982-1999) to Future Conditions"),
   sidebarLayout(
@@ -46,11 +44,6 @@ ui <- fluidPage(
                           rownames(subset(brewer.pal.info, category %in% c("seq", "div")))),
                           checkboxInput("legend", "Show legend", TRUE),
               actionButton("resetAll", "Reset All")),
-              #actionButton("resetYear", "Reset Year"),
-              #actionButton("resetGCM", "Reset GCM"),
-              #actionButton("resetVariable", "Reset Variable"),
-              #actionButton("resetColor", "Reset Color")),
-
 
   mainPanel(
     tags$style(HTML("
@@ -93,10 +86,8 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   #This reactive expression represents the palette function,
   #which changes as the user makes selections in UI.
-  #colorpal <- eventReactive(input$GCMnames,{
   colorpal<-eventReactive(input$colors,{
     colorNumeric(input$colors, datum())
-    #colorNumeric(input$colors,depAll$ECHAM5_2030)
   })
   
   observeEvent(input$resetAll, {
@@ -105,10 +96,8 @@ server <- function(input, output, session) {
     
     reset("select")
     reset("do")
-    #reset("GCMnames")
     reset("select2")
     reset("do2")
-    #reset("colors")
   })
   
   values<-reactiveValues(df_data=NULL)
@@ -129,25 +118,24 @@ server <- function(input, output, session) {
   })
 
    strm_var<-eventReactive(input$do2,{
-     #sVar<-SF_vars[as.numeric(input$select2)]
      sVar<-input$select2
      return(sVar)
   })
   
   datum<-eventReactive(input$do2,{
-  #datum<-eventReactive(input$GCMnames,{
-    #data<-depAll[,paste(input$GCMnames,"_",fut_yr(),sep="")]
     data<-dFrame[,paste(input$GCMnames,input$select2,fut_yr(),sep="_")]
     return (data)
   })
   
-
-
   output$map <- renderLeaflet({
   # Use leaflet() here, and only include aspects of the map that
   # won't need to change dynamically (at least, not unless the
   # entire map is being torn down and recreated).
-  leaflet(finalSegs) %>% addTiles()%>%
+    popupB <-paste0("<strong>Name: </strong>",
+                    finalBasins@data$NAME)
+    
+  leaflet(finalSegs) %>% addProviderTiles('Esri.WorldTopoMap') %>%
+    addPolygons(data=finalBasins,fillColor="transparent",popup=~popupB)%>%
    fitBounds(~min(Longs), ~min(Lats), ~max(Longs), ~max(Lats))
   })
 
@@ -155,40 +143,37 @@ server <- function(input, output, session) {
   eventReactive(input$do2,{
     pal <- colorpal()
 
-    #popup <- paste0("<strong>Name: </strong>",
-    #                finalSegs@data$Nseg)
-
     popup <- paste0("<strong>Name: </strong>",
-                    cat(paste(finalSegs@data$Basin,finalSegs@data$Nseg,sep="\n")))
+                    cat(paste(finalSegs@data$Basin,finalSegs@data$Segment,sep="\n")))
+    
+    popupB <-paste0("<strong>Name: </strong>",
+                    finalBasins@data$NAME)
     
     seg_ID<-c(finalSegs@data$Nseg)
 
     leafletProxy("map",data=finalSegs) %>%
       clearShapes() %>%
-      #addPolylines(color="red",weight=3,popup=~popup)
-      #addPolylines(color=~pal(datum()),weight=3,layerId=POI_ID,popup=~popup)
-      addPolylines(color=~pal(datum()),weight=3,layerId=seg_ID,popup=~popup)
+      addPolygons(data=finalBasins,fillColor="transparent",popup=~popupB)%>%
+      addPolylines(color=~pal(datum()),weight=6,layerId=seg_ID,popup=~popup)
   })
 
   #Use a separate observer to recreate the legend as needed.
   observe({
     pal <- colorpal()
 
-    #popup <- paste0("<strong>Name: </strong>",
-    #                finalSegs@data$Nseg)
-
     popup <- paste0("<strong>Name: </strong>",
-                    paste(finalSegs@data$Basin,finalSegs@data$Nseg,sep="\n"))
+                    paste(finalSegs@data$Basin,finalSegs@data$Segment,sep="\n"))
+    
+    popupB <-paste0("<strong>Name: </strong>",
+                    finalBasins@data$NAME)
     
     seg_ID<-c(finalSegs@data$Nseg)
 
     proxy <- leafletProxy("map",data=finalSegs) %>%
       clearShapes() %>%
-      #addPolylines(color="red",weight=3,popup=~popup)
-      #addPolylines(color=~pal(datum()),weight=3,layerId=POI_ID,popup=~popup)
-      addPolylines(color=~pal(datum()),weight=3,layerId=seg_ID,popup=~popup)
-    
-
+      addPolygons(data=finalBasins,fillColor="transparent",popup=~popupB)%>%
+      addPolylines(color=~pal(datum()),weight=6,layerId=seg_ID,popup=~popup)
+  
     #Remove any existing legend, and only if the legend is
     #enabled, create a new one.
     proxy %>% clearControls()
@@ -203,13 +188,10 @@ server <- function(input, output, session) {
 
   observeEvent(input$map_shape_click,{
     event <- input$map_shape_click
-
-    print(event)
     values$df_data<-dFrame[event$id,]
     
     print (values$df_data)
     print(input$GCMnames)
-    #values2<-values[,grep("GFDL",colnames(values))]
     values2<-values$df_data[,grep(input$GCMnames,colnames(values$df_data))]
     print(values2)
     
@@ -226,6 +208,16 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$map_shape_click,{
+    event<-input$map_shape_click
+    segInfo<-finalSegs@data[event$id,]
+    basin<-segInfo$Basin
+    segId<-segInfo$Segment
+    
+    event <- input$map_shape_click
+    print("craptastic")
+    print(event)
+    print(dim(values$df_data))
+    
     print(dim(values$df_data))
     if (dim(values$df_data)[2]>1){
       datColumns<-c("2030","2055","2080")
@@ -235,23 +227,13 @@ server <- function(input, output, session) {
     print(datColumns)
     output$ex1 <- DT::renderDataTable(
       DT::datatable(values$df_data, options=list(pageLength=17),
-                    colnames=datColumns,rownames = SF_vars)
+                    colnames=datColumns,rownames = SF_vars,
+                    caption=htmltools::tags$caption(
+                      style='caption-side: top; text-align: Left; font-weight: bold; font-size:20px',
+                      htmltools::withTags(paste(basin," Watershed, segment #",segId,sep=""))
+                    ))
     )
   })
-  
-
-  # observeEvent(input$resetYear, {
-  #   reset("gender")
-  # })
-  # observeEvent(input$resetGCM, {
-  #   reset("letter")
-  # })
-  # observeEvent(input$resetVariable, {
-  #   reset("letter")
-  # })
-  # observeEvent(input$resetColor, {
-  #   reset("form")
-  # })
 }
 
 shinyApp(ui, server)
