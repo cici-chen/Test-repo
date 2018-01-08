@@ -2,9 +2,9 @@
 A children's book
 
 Congratulations!  
-Today is your day.  
-You're off to Great Places!  
-You're off and away
+Today is their day.  
+They're off to Great Places!  
+They're off and away
 
 You have brains in your head.  
 You have feet in your shoes.  
