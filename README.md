@@ -1,14 +1,15 @@
 # test-repo
 A children's book
 
-Congratulations!  
-Today is their day.  
-They're off to Great Places!  
-They're off and away
+Congratulations to myself!  
+Today is my day.  
+I'm off to Great Places!  
+I'm off and away
 
-You have brains in your head.  
-You have feet in your shoes.  
-You can steer yourself any direction you choose.  
-You're on your own.  
-And you know what you know.  
-And YOU are the guy who'll decide where to go.
+I have brains in my head.  
+I have feet in my shoes.  
+I can steer myself any direction I choose.  
+
+I'm on my own.  
+And I know what I know.  
+And I am the guy who'll decide where to go.
