@@ -34,19 +34,19 @@ you'll want to go down.
 In that case, of course,  
 you'll head straight out of town.  
 
-It's opener there
-in the wide open air.
+It's opener there  
+in the wide open air.  
 
-Out there things can happen
-and frequently do
-to people as brainy
-and footsy as you.
+Out there things can happen  
+and frequently do  
+to people as brainy  
+and footsy as you.  
 
-And then things start to happen,
-don't worry. Don't stew.
-Just go right along.
-You'll start happening too.
+And then things start to happen,  
+don't worry. Don't stew.  
+Just go right along.  
+You'll start happening too.  
 
-OH!
+OH!  
 THE PLACES YOU'LL GO!
 >>>>>>> 08851d5... Add more lines
