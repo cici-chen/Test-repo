@@ -35,6 +35,3 @@ And then things start to happen,
 don't worry. Don't stew.  
 Just go right along.  
 You'll start happening too.  
-
-OH!  
-THE PLACES YOU'LL GO!
