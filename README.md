@@ -12,5 +12,3 @@ You can steer yourself
 any direction you choose.  
 You're on your own. And you know what you know.  
 And YOU are the guy who'll decide where to go.  
-
-Hi my password is 12345678
