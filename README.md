@@ -36,8 +36,3 @@ don't worry. Don't stew.
 Just go right along.
 You'll start happening too.
 
-OH!
-THE PLACES YOU'LL GO!
-        hello
-    what
-         cool
