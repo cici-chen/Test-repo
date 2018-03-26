@@ -1,0 +1,44 @@
+{
+  "name": "davide-watch",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "console": "node --harmony app.js",
+    "start": "pm2 start app.js --name='davide-watch' --node-args='--harmony'",
+    "stop": "pm2 stop davide-watch",
+    "delete": "pm2 delete davide-watch"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.2.39",
+    "better-console": "^0.2.4",
+    "bluebird": "^3.2.0",
+    "body-parser": "^1.13.3",
+    "compression": "^1.5.2",
+    "cookie-parser": "^1.3.3",
+    "cron": "^1.1.0",
+    "express": "^4.13.3",
+    "glob": "^5.0.3",
+    "hashmap": "^2.0.4",
+    "lodash": "^4.3.0",
+    "log4js": "^0.6.31",
+    "method-override": "^2.3.0",
+    "moment": "^2.11.2",
+    "moment-range": "^2.1.0",
+    "moment-timezone": "^0.5.0",
+    "morgan": "^1.6.1",
+    "nedb": "^1.7.4",
+    "nodemailer": "^0.7.1",
+    "nodemailer-ses-transport": "^1.3.0",
+    "redis": "^2.4.2",
+    "sequelize": "^3.5.1",
+    "serve-favicon": "^2.3.0",
+    "swig": "^1.4.2"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-less": "^3.0.1",
+    "gulp-livereload": "^3.8.0",
+    "gulp-nodemon": "^2.0.2",
+    "gulp-plumber": "^1.0.0"
+  }
+}
